@@ -1,5 +1,9 @@
+
+from contextlib import nullcontext
+from tabnanny import verbose
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+
 # Create your models here.
 
 
@@ -42,8 +46,9 @@ class Departaments(BaseModel):
         return self.nOficina 
 
 class Cargo(BaseModel):
-    nDepartamentos = models.ForeignKey(Departaments, on_delete=models.CASCADE)
+    nDepartamentos = models.ForeignKey(Departaments, on_delete=models.CASCADE,verbose_name="Departamento")
     nCargo = models.CharField('Cargo', max_length=50)
+    nGerente = models.CharField('Nombre del Encargado', max_length=50, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Cargo'
@@ -51,4 +56,48 @@ class Cargo(BaseModel):
     
     def __str__(self):
         return self.nCargo
+
+class Invitado (BaseModel):
+    nombre = models.CharField('Nombre y Apellido', max_length=100, null=False, blank=False)
+    cedula = models.CharField('Numero de Cedula', max_length=10, unique=True, blank=False,null=False)
     
+    class Meta:
+        verbose_name = 'Registro Visitante'
+        verbose_name_plural = 'Registro de los visitantes'
+
+    def __str__(self):
+        return self.cedula + " "+ self.nombre
+
+
+class Herramientas(BaseModel):
+    tipo_Equipo = [('lap', 'Laptop'),
+               ('vb', 'videoBeam'),
+               ('sp', 'Speaker'), 
+                ('na', 'Ninguno'),                              
+               ]
+    equipos= models.CharField('Equipos Tecnologicos', max_length=3, choices=tipo_Equipo, null=False, default='na')
+    marca = models.CharField('Marca',max_length=40,)
+    serial = models.CharField('Serial Code', max_length=50)
+
+    class Meta:
+        verbose_name = 'Equipos Tecnologico'
+        verbose_name_plural = 'Equipos Tecnologicos'
+
+    def __str__(self) -> str:
+        return self.equipos
+
+
+class Access(BaseModel):
+    cedula = models.ForeignKey(Invitado, on_delete=models.CASCADE)    
+    nDepartamento = models.ForeignKey(Departaments, on_delete=models.CASCADE)
+    nCargo = models.ForeignKey( Cargo, on_delete=models.CASCADE)
+    fEntrada = models.TimeField('Hora',auto_now=True)
+    FSalida = models.TimeField('Hora',auto_now=False, auto_now_add= True)
+    equipo = models.ForeignKey(Herramientas, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name= 'Acceso a la Sede'
+        verbose_name_plural  ='Acceso a la Sede'
+
+    def __str__(self):
+        return '{}'.format(self.fEntrada.strftime)

@@ -1,13 +1,15 @@
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 from django.contrib import admin
 from django.utils.html import format_html
-from . models import Access, Empresa, Cargo, Departaments, Herramientas, Invitado
+from . models import Access, Empresa, Cargo, Departaments, Invitado
 
 
 # Register your models here.
 @admin.register(Empresa)
 class GestionEmpresa(admin.ModelAdmin):
-   list_display = ( 'id','nEmbresa', 'clase_rif', 'rif','naCronimo','logoImg',)
-   list_display_links = ('nEmbresa',)
+   list_display = ( 'id','nEmpresa', 'clase_rif', 'rif','naCronimo','logoImg',)
+   list_display_links = ('nEmpresa',)
 
 
 @admin.register(Departaments)
@@ -26,13 +28,24 @@ class GestionInvitado(admin.ModelAdmin):
     list_display_links = ('cedula',)
 
 
-@admin.register(Herramientas)
-class GestionHerramientas(admin.ModelAdmin):
-    list_display = ('serial','marca','equipos')
-    list_display_links = ('marca',)
-
+class AccesoResource(resources.ModelResource):
+    fields= (
+        'id',
+        'nInvitado',
+        'empresa',
+        'nOficina',
+        'nDepartamentos',
+        'fEntrada',
+        'equipos',
+        'marca',
+        'serial',
+    )
+    class Meta:
+        model = Access
 
 @admin.register(Access)
-class GestionAcesso(admin.ModelAdmin):
-    list_display = ('id','cedula','nDepartamento','nCargo','fEntrada','FSalida',)
-    list_display_links = ('cedula',)
+class GestionAcesso(ImportExportModelAdmin):
+    resource_classes = [AccesoResource]
+    list_display = ('id','nInvitado','empresa','nOficina','nDepartamentos','fEntrada','equipos','marca','serial',)
+
+
